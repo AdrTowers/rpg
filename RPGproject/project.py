@@ -16,7 +16,19 @@ Commands:
 def showStatus():
     # print the player's current status
     print('---------------------------')
-    print('You are in the ' + currentRoom)
+    #print('You are in the ' + currentRoom)
+    if 'Hall' in currentRoom:
+        print(f"You're in the {currentRoom}, you can go north, east or south")
+    elif 'Deck' in currentRoom:
+        print(f"You're in the {currentRoom}, you can only go south")
+    elif 'Dining Room' in currentRoom:
+        print(f"You're in the {currentRoom}, you can go west or south")
+    elif 'Garden' in currentRoom:
+        print(f"You're in the {currentRoom}, you can only go north")
+    elif 'Kitchen' in currentRoom:
+        print(f"You're in the {currentRoom}, you can only go north")
+    elif 'Pantry' in currentRoom:
+        print(f"You're in the {currentRoom}, you can only go north")
     # print the current inventory
     print('Inventory : ' + str(inventory))
     # print an item if there is one
@@ -34,8 +46,14 @@ rooms = {
 
     'Hall': {
         'south': 'Kitchen',
+        'north': 'Deck',
         'east': 'Dining Room',
         'item': 'key'
+    },
+
+    'Deck': {
+        'south': 'Hall',
+        'item': 'sword'
     },
 
     'Kitchen': {
