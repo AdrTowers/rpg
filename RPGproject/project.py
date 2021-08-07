@@ -1,5 +1,50 @@
 #!/usr/bin/python3
 
+# an inventory, which is initially empty
+inventory = []
+# start the player in the Hall
+currentRoom = 'Entrance'
+
+# possible directions
+directions = []
+all_directions = ["north", "east", "south", "west"]
+
+# a dictionary linking a room to other rooms
+rooms = {
+    'Entrance': {
+    'east': 'Hall',
+    'item': ['key']
+    },
+    'Hall': {
+        'south': 'Kitchen',
+        'north': 'Deck',
+        'east': 'Dining Room',
+        'west': 'Entrance'
+    },
+    'Deck': {
+        'south': 'Hall',
+        'item': ['sword']
+    },
+    'Kitchen': {
+        'north': 'Hall',
+        'item': ['monster']
+    },
+    'Dining Room': {
+        'west': 'Hall',
+        'south': 'Garden',
+        'item': ['potion'],
+        'north': 'Pantry',
+    },
+    'Garden': {
+        'north': 'Dining Room'
+    },
+    'Pantry': {
+        'south': 'Dining Room',
+        'item': ['cookie']
+    }
+}
+
+
 # Replace RPG starter project with this code when new instructions are live
 
 def showInstructions():
@@ -25,56 +70,12 @@ def showStatus():
 
     # print an item if there is one
     if "item" in rooms[currentRoom]:
-        print('You see a ' + rooms[currentRoom]['item'])
+        print('You see a ' + str(rooms[currentRoom]['item']))
     print("---------------------------")
 
     # print the current inventory
     print('Inventory : ' + str(inventory))
 
-# an inventory, which is initially empty
-inventory = []
-
-# possible directions
-directions = []
-all_directions = ["north", "east", "south", "west"]
-
-# a dictionary linking a room to other rooms
-# A dictionary linking a room to other rooms
-rooms = {
-
-    'Hall': {
-        'south': 'Kitchen',
-        'north': 'Deck',
-        'east': 'Dining Room',
-        'item': 'key'
-    },
-
-    'Deck': {
-        'south': 'Hall',
-        'item': 'sword'
-    },
-
-    'Kitchen': {
-        'north': 'Hall',
-        'item': 'monster',
-    },
-    'Dining Room': {
-        'west': 'Hall',
-        'south': 'Garden',
-        'item': 'potion',
-        'north': 'Pantry',
-    },
-    'Garden': {
-        'north': 'Dining Room'
-    },
-    'Pantry': {
-        'south': 'Dining Room',
-        'item': 'cookie',
-    }
-}
-
-# start the player in the Hall
-currentRoom = 'Hall'
 
 showInstructions()
 
@@ -90,7 +91,7 @@ while True:
     # ['go','east']
     move = ''
     while move == '':
-        move = input('>')
+        move = input('>> ')
 
     # split allows an items to have a space on them
     # get golden key is returned ["get", "golden key"]
@@ -98,18 +99,22 @@ while True:
 
     # if they type 'go' first
     if move[0] == 'go':
-        # directions.clear()
-        # check that they are allowed wherever they want to go
-        if move[1] in rooms[currentRoom]:
-            # set the current room to the new room
-            currentRoom = rooms[currentRoom][move[1]]
+        # check that they have key to get in through the entrance
+        if currentRoom == "Entrance" and move[1] in rooms[currentRoom]:
+            if 'key' in inventory:
+                # set the current room to the new room
+                currentRoom = rooms[currentRoom][move[1]]
+            else:
+                print("You need to get KEY to get in. DUHH!!!!")
+        elif move[1] in rooms[currentRoom]:
+                # set the current room to the new room
+                    currentRoom = rooms[currentRoom][move[1]]
         # there is no door (link) to the new room
         else:
             print('You can\'t go that way!')
 
     # if they type 'get' first
     if move[0] == 'get':
-        # directions.clear()
         # if the room contains an item, and the item is the one they want to get
         if "item" in rooms[currentRoom] and move[1] in rooms[currentRoom]['item']:
             # add the item to their inventory
