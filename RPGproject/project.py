@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import requests
 
 # an inventory, which is initially empty
 inventory = []
@@ -9,17 +10,20 @@ currentRoom = 'Entrance'
 directions = []
 all_directions = ["north", "east", "south", "west"]
 
+CAT_API_URL = 'https://catfact.ninja/facts?limit=3&max_length=88'
+
 # a dictionary linking a room to other rooms
 rooms = {
     'Entrance': {
-    'east': 'Hall',
-    'item': ['key']
+        'east': 'Hall',
+        'item': ['key']
     },
     'Hall': {
         'south': 'Kitchen',
         'north': 'Deck',
         'east': 'Dining Room',
-        'west': 'Entrance'
+        'west': 'Entrance',
+        'items': 'cat_facts_posters'  # if currentroom items has cat api
     },
     'Deck': {
         'south': 'Hall',
@@ -27,26 +31,38 @@ rooms = {
     },
     'Kitchen': {
         'north': 'Hall',
-        'item': ['monster']
+        'item': ['monster']  # LOSE scenario
     },
     'Dining Room': {
         'west': 'Hall',
-        'south': 'Garden',
+        'south': 'Garden',  # WIN scenario
         'item': ['potion'],
         'north': 'Pantry',
+        'east': 'Vault Room'
     },
     'Garden': {
-        'north': 'Dining Room'
+        'north': 'Dining Room',
+        'item': 'cat'
     },
     'Pantry': {
         'south': 'Dining Room',
         'item': ['cookie']
+    },
+    'Vault Room': {   # need code to get in random guess up to 3
+        'south': 'Garage',
+        'item': ['$$$', 'gold', 'passport']
+    },
+    'Garage': {
+        'north': 'Vault Room',
+        'items': 'Lamborghini',  # in lambo
+        'east': 'Street'  # WIN scenario
     }
+
+
 }
 
 
 # Replace RPG starter project with this code when new instructions are live
-
 def showInstructions():
     # print a main menu and the commands
     print('''
@@ -62,20 +78,30 @@ def showStatus():
     # print the player's current status
     print('---------------------------')
     print('You are in the ' + currentRoom)
+
+    # print an item if there is one
+    if "item" in rooms[currentRoom]:
+        print('You see a ' + str(rooms[currentRoom]['item']))
+
+    if currentRoom == "Garden":
+        print("You yell at the cat. The cat throws random CAT-FACTS. \n Cat: \"")
+        print(f"Did you know?\n {getCatFacts()}")
+        
+    # print the current inventory
+    print("---------------------------")
+    print('Inventory : ' + str(inventory))
+
     # print possible directions in a room
     for key in rooms[currentRoom].keys():
         if key in all_directions:
             directions.append(key)
     print(f"Where do you wanna go?{directions}")
 
-    # print an item if there is one
-    if "item" in rooms[currentRoom]:
-        print('You see a ' + str(rooms[currentRoom]['item']))
-    print("---------------------------")
-
-    # print the current inventory
-    print('Inventory : ' + str(inventory))
-
+def getCatFacts():
+    response = requests.get(CAT_API_URL)
+    catFacts = response.json().get("data")
+    for fact in catFacts:
+        print(fact["fact"])
 
 showInstructions()
 
@@ -107,8 +133,8 @@ while True:
             else:
                 print("You need to get KEY to get in. DUHH!!!!")
         elif move[1] in rooms[currentRoom]:
-                # set the current room to the new room
-                    currentRoom = rooms[currentRoom][move[1]]
+            # set the current room to the new room
+            currentRoom = rooms[currentRoom][move[1]]
         # there is no door (link) to the new room
         else:
             print('You can\'t go that way!')
