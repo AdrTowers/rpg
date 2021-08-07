@@ -16,29 +16,27 @@ Commands:
 def showStatus():
     # print the player's current status
     print('---------------------------')
-    #print('You are in the ' + currentRoom)
-    if 'Hall' in currentRoom:
-        print(f"You're in the {currentRoom}, you can go north, east or south")
-    elif 'Deck' in currentRoom:
-        print(f"You're in the {currentRoom}, you can only go south")
-    elif 'Dining Room' in currentRoom:
-        print(f"You're in the {currentRoom}, you can go west or south")
-    elif 'Garden' in currentRoom:
-        print(f"You're in the {currentRoom}, you can only go north")
-    elif 'Kitchen' in currentRoom:
-        print(f"You're in the {currentRoom}, you can only go north")
-    elif 'Pantry' in currentRoom:
-        print(f"You're in the {currentRoom}, you can only go north")
-    # print the current inventory
-    print('Inventory : ' + str(inventory))
+    print('You are in the ' + currentRoom)
+    # print possible directions in a room
+    for key in rooms[currentRoom].keys():
+        if key in all_directions:
+            directions.append(key)
+    print(f"Where do you wanna go?{directions}")
+
     # print an item if there is one
     if "item" in rooms[currentRoom]:
         print('You see a ' + rooms[currentRoom]['item'])
     print("---------------------------")
 
+    # print the current inventory
+    print('Inventory : ' + str(inventory))
 
 # an inventory, which is initially empty
 inventory = []
+
+# possible directions
+directions = []
+all_directions = ["north", "east", "south", "west"]
 
 # a dictionary linking a room to other rooms
 # A dictionary linking a room to other rooms
@@ -84,6 +82,7 @@ showInstructions()
 while True:
 
     showStatus()
+    directions.clear()
 
     # get the player's next 'move'
     # .split() breaks it up into an list array
@@ -99,6 +98,7 @@ while True:
 
     # if they type 'go' first
     if move[0] == 'go':
+        # directions.clear()
         # check that they are allowed wherever they want to go
         if move[1] in rooms[currentRoom]:
             # set the current room to the new room
@@ -109,6 +109,7 @@ while True:
 
     # if they type 'get' first
     if move[0] == 'get':
+        # directions.clear()
         # if the room contains an item, and the item is the one they want to get
         if "item" in rooms[currentRoom] and move[1] in rooms[currentRoom]['item']:
             # add the item to their inventory
