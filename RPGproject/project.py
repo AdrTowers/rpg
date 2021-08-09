@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import requests
+import random
 
 # an inventory, which is initially empty
 inventory = []
@@ -10,32 +11,33 @@ currentRoom = 'Entrance'
 directions = []
 all_directions = ["north", "east", "south", "west"]
 
+killedMonster = False
+
 CAT_API_URL = 'https://catfact.ninja/facts?limit=3&max_length=88'
 
 # a dictionary linking a room to other rooms
 rooms = {
     'Entrance': {
-        'east': 'Hall',
-        'item': ['key']
+        'east': 'Hall', # need key to get in Hall
+        'item': ['key'] 
     },
     'Hall': {
         'south': 'Kitchen',
         'north': 'Deck',
         'east': 'Dining Room',
         'west': 'Entrance',
-        'items': 'cat_facts_posters'  # if currentroom items has cat api
     },
     'Deck': {
         'south': 'Hall',
-        'item': ['sword']
+        'item': ['sword'] # need sword to kill monster
     },
     'Kitchen': {
         'north': 'Hall',
-        'item': ['monster']  # LOSE scenario
+        'item': 'monster'
     },
     'Dining Room': {
         'west': 'Hall',
-        'south': 'Garden',  # WIN scenario
+        'south': 'Garden', 
         'item': ['potion'],
         'north': 'Pantry',
         'east': 'Vault Room'
@@ -46,7 +48,7 @@ rooms = {
     },
     'Pantry': {
         'south': 'Dining Room',
-        'item': ['cookie']
+        'item': ['IED']
     },
     'Vault Room': {   # need code to get in random guess up to 3
         'south': 'Garage',
@@ -54,11 +56,12 @@ rooms = {
     },
     'Garage': {
         'north': 'Vault Room',
-        'items': 'Lamborghini',  # in lambo
+        'item': 'lamborghini',  # in lambo
         'east': 'Street'  # WIN scenario
+    },
+    'Street': {
+        'west': 'Garage'
     }
-
-
 }
 
 
@@ -82,11 +85,11 @@ def showStatus():
     # print an item if there is one
     if "item" in rooms[currentRoom]:
         print('You see a ' + str(rooms[currentRoom]['item']))
-
+    # print random CAT FACTs from API when the player sees cat in the Garden
     if currentRoom == "Garden":
-        print("You yell at the cat. The cat throws random CAT-FACTS. \n Cat: \"")
-        print(f"Did you know?\n {getCatFacts()}")
-        
+        print("You yelled at the cat. The cat throws random CAT-FACTS below:\n")
+        getCatFacts()
+            
     # print the current inventory
     print("---------------------------")
     print('Inventory : ' + str(inventory))
@@ -97,17 +100,18 @@ def showStatus():
             directions.append(key)
     print(f"Where do you wanna go?{directions}")
 
+# get random cat-facts from cat fact API
 def getCatFacts():
     response = requests.get(CAT_API_URL)
     catFacts = response.json().get("data")
     for fact in catFacts:
         print(fact["fact"])
 
+
 showInstructions()
 
 # loop forever
 while True:
-
     showStatus()
     directions.clear()
 
@@ -132,6 +136,18 @@ while True:
                 currentRoom = rooms[currentRoom][move[1]]
             else:
                 print("You need to get KEY to get in. DUHH!!!!")
+        elif currentRoom == "Dining Room" and move[1] == "east" and move[1] in rooms[currentRoom]:
+        # player needs to guess code to get into vault room. Code a random number between 1-5
+            random_code = str(random.randint(1,5))
+            vault_code = ""
+            while vault_code != random_code:
+                vaultCode = input("You are entering a vault room. \nEnter code to get inside the vault room: [* HINT: single num between 1-5]\n>>")
+                if random_code == vaultCode:
+                 # set the current room to the new room
+                    print("Correct code entered")
+                    currentRoom = rooms[currentRoom][move[1]]
+                    break
+                print("Incorrect code entered. Try again..")
         elif move[1] in rooms[currentRoom]:
             # set the current room to the new room
             currentRoom = rooms[currentRoom][move[1]]
@@ -154,12 +170,29 @@ while True:
             # tell them they can't get it
             print('Can\'t get ' + move[1] + '!')
 
-    # Define how a player can win
-    if currentRoom == 'Garden' and 'key' in inventory and 'potion' in inventory:
-        print('You escaped the house with the ultra rare key and magic potion... YOU WIN!')
-        break
+    # if they type 'kill'
+    if move[0] == 'kill':
+        if "item" in rooms[currentRoom] and move[1] in rooms[currentRoom]['item']:
+            if 'sword' in inventory:
+                if rooms[currentRoom]['item'] == "monster":
+                    killedMonster = True
+                    del rooms[currentRoom]['item']
+                    print("Great Work!! You killed the MONSTER !!!!")
+            else: 
+                print("You don't have sword in inventory to kill the", rooms[currentRoom]['item'])
 
-    # If a player enters a room with a monster
-    elif 'item' in rooms[currentRoom] and 'monster' in rooms[currentRoom]['item']:
-        print('A monster has got you... GAME OVER!')
+    # SUPER-WIN scenario
+    if killedMonster == True and '$$$' in inventory and 'lamborghini' in inventory and currentRoom == 'Street':
+        print(f'YOU SUPER WIN! You KILLED the monster and escaped the house with {inventory}')
+        break
+    # WIN scenario
+    elif '$$$' in inventory and 'lamborghini' in inventory and currentRoom == 'Street':
+        print(f'YOU WIN! You escaped the house with {inventory}')
+        break
+    # If a player enters a room with IED, LOSES
+    elif 'item' in rooms[currentRoom] and 'IED' in rooms[currentRoom]['item']:
+        print("IED Exploded. YOU ARE DEAD!!!!!")
+        break
+    elif currentRoom == 'Street':
+        print("YOU JUST SURVIVED THE MONSTER. Consoloation WIN only!!!")
         break
