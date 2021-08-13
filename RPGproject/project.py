@@ -18,8 +18,8 @@ CAT_API_URL = 'https://catfact.ninja/facts?limit=3&max_length=88'
 # a dictionary linking a room to other rooms
 rooms = {
     'Entrance': {
-        'east': 'Hall', # need key to get in Hall
-        'item': ['key'] 
+        'east': 'Hall',  # need key to get in Hall
+        'item': ['key']
     },
     'Hall': {
         'south': 'Kitchen',
@@ -29,7 +29,7 @@ rooms = {
     },
     'Deck': {
         'south': 'Hall',
-        'item': ['sword'] # need sword to kill monster
+        'item': ['sword']  # need sword to kill monster
     },
     'Kitchen': {
         'north': 'Hall',
@@ -37,7 +37,7 @@ rooms = {
     },
     'Dining Room': {
         'west': 'Hall',
-        'south': 'Garden', 
+        'south': 'Garden',
         'item': ['potion'],
         'north': 'Pantry',
         'east': 'Vault Room'
@@ -89,7 +89,7 @@ def showStatus():
     if currentRoom == "Garden":
         print("You yelled at the cat. The cat throws random CAT-FACTS below:\n")
         getCatFacts()
-            
+
     # print the current inventory
     print("---------------------------")
     print('Inventory : ' + str(inventory))
@@ -101,6 +101,8 @@ def showStatus():
     print(f"Where do you wanna go?{directions}")
 
 # get random cat-facts from cat fact API
+
+
 def getCatFacts():
     response = requests.get(CAT_API_URL)
     catFacts = response.json().get("data")
@@ -137,11 +139,12 @@ while True:
             else:
                 print("You need to get KEY to get in. DUHH!!!!")
         elif currentRoom == "Dining Room" and move[1] == "east" and move[1] in rooms[currentRoom]:
-        # player needs to guess code to get into vault room. Code a random number between 1-5
-            random_code = str(random.randint(1,5))
+            # player needs to guess code to get into vault room. Code a random number between 1-5
+            random_code = str(random.randint(1, 5))
             vault_code = ""
             while vault_code != random_code:
-                vaultCode = input("You are entering a vault room. \nEnter code to get inside the vault room: [* HINT: single num between 1-5]\n>>")
+                vaultCode = input(
+                    "You are entering a vault room. \nEnter code to get inside the vault room: [* HINT: single num between 1-5]\n>>")
                 if random_code == vaultCode:
                  # set the current room to the new room
                     print("Correct code entered")
@@ -170,6 +173,21 @@ while True:
             # tell them they can't get it
             print('Can\'t get ' + move[1] + '!')
 
+    #     # teleportation!
+    # if move[0] == 'teleport':
+    #     if 'potion' in inventory:
+    #         print("Teleporting to", move[1])
+    #         currentRoom = rooms[move[1]]
+    #     else:
+    #         print("You need to drink a potion!")
+
+    # if they type "swing"
+    if move[0] == 'swing':
+        if 'sword' in inventory:
+            print("You unsheathe your sword and swing it around carelessly")
+        else:
+            print("Stop fooling around and focus on your task.")
+
     # if they type 'kill'
     if move[0] == 'kill':
         if "item" in rooms[currentRoom] and move[1] in rooms[currentRoom]['item']:
@@ -178,12 +196,14 @@ while True:
                     killedMonster = True
                     del rooms[currentRoom]['item']
                     print("Great Work!! You killed the MONSTER !!!!")
-            else: 
-                print("You don't have sword in inventory to kill the", rooms[currentRoom]['item'])
+            else:
+                print("You don't have sword in inventory to kill the",
+                      rooms[currentRoom]['item'])
 
     # SUPER-WIN scenario
     if killedMonster == True and '$$$' in inventory and 'lamborghini' in inventory and currentRoom == 'Street':
-        print(f'YOU SUPER WIN! You KILLED the monster and escaped the house with {inventory}')
+        print(
+            f'YOU SUPER WIN! You KILLED the monster and escaped the house with {inventory}')
         break
     # WIN scenario
     elif '$$$' in inventory and 'lamborghini' in inventory and currentRoom == 'Street':
